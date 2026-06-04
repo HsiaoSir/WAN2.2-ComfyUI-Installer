@@ -95,9 +95,12 @@ for p in "${REQUIRED_PKGS[@]}"; do
   fi
 done
 if (( ${#MISSING_PKGS[@]} )); then
-  # 用 noninteractive 前端,避免某些套件 (tzdata, libc6-dev 等) 跳出 debconf 對話框卡死
-  export DEBIAN_FRONTEND=noninteractive
-  sudo -E apt-get update -y
+  # 先修復可能存在的 dpkg 中斷狀態 (前次安裝被 Ctrl-C / 斷電 / 重開機會留下半完成的套件)。
+  # 若沒問題,這條指令幾秒鐘就完成,不會做事;有問題的話它會自動修好。
+  sudo dpkg --configure -a 2>/dev/null || true
+  # apt update。把 DEBIAN_FRONTEND 用「VAR=val cmd」形式傳給 sudo —— 比 `-E` 更通用,
+  # 不受 sudoers 是否允許 env_keep 影響。避免 tzdata 等套件跳 debconf 對話框卡死。
+  sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
   # 逐一確認在此 Ubuntu 版本「真的裝得起來」。
   # 例:Ubuntu 24.04/26.04 把 libglib2.0-0 改名為 libglib2.0-0t64 (time_t 轉換),
   # 舊名仍可經由「虛擬套件 Provides」安裝,但若哪天某個名稱真的消失,
@@ -112,7 +115,7 @@ if (( ${#MISSING_PKGS[@]} )); then
   done
   if (( ${#INSTALL_PKGS[@]} )); then
     add "${INSTALL_PKGS[*]}"
-    sudo -E apt-get install -y "${INSTALL_PKGS[@]}"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${INSTALL_PKGS[@]}"
   else
     ok "沒有可安裝的缺漏套件"
   fi
