@@ -54,6 +54,17 @@
 
 ## 安裝(從這裡開始)
 
+### 0. 先確認有 git(沒有就裝一下)
+
+新裝好的 Ubuntu 預設**沒有 git**,要先用 apt 裝:
+
+```bash
+sudo apt update && sudo apt install -y git
+```
+
+> 想確認有沒有裝:`git --version`,印出版本號(例如 `git version 2.43.0`)就 OK。
+> 如果你的機器其實已經有 git,這步可以跳過。
+
 ### 1. Clone 這個 repo
 
 ```bash
