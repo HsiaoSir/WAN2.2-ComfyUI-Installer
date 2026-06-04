@@ -1,355 +1,324 @@
-# Wan2.2-TI2V-5B × ComfyUI 完整入門指南
+# WAN2.2-ComfyUI-Installer
 
-> 給**完全新手**的詳細手冊:在 Ubuntu (Intel CPU + NVIDIA RTX,VRAM ≤ 12GB) 上,
-> 用 [ComfyUI](https://github.com/comfyanonymous/ComfyUI) 跑
-> [Wan2.2-TI2V-5B](https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B) 產生 AI 影片。
-> 所有腳本**可重複執行**(已裝/已下載的自動略過),所有網址都**實際驗證過存在**。
-
----
-
-## 0. 先搞懂幾個名詞 (新手必讀)
-
-| 名詞 | 白話解釋 |
-|---|---|
-| **ComfyUI** | 一個用「節點連線」方式操作 AI 繪圖/影片的工具。你在網頁上把方塊接起來就能生成。 |
-| **模型 / Diffusion Model** | AI 的「大腦」,真正畫出畫面的核心權重檔。我們用的是 `wan2.2_ti2v_5B_fp16.safetensors`。 |
-| **文字編碼器 / Text Encoder** | 把你打的文字 (prompt) 翻譯成模型看得懂的數字。我們用 `umt5_xxl_fp8_...`。 |
-| **VAE** | 負責「壓縮/還原畫面」的轉換器。沒有它畫面出不來。我們用 `wan2.2_vae.safetensors`。 |
-| **LoRA** | 一種「外掛微調」,可加風格或加速。**TI2V-5B 預設不需要**。 |
-| **工作流 / Workflow** | 一張「節點接線圖」,決定生成流程。ComfyUI 內建官方範本可直接載入。 |
-| **VRAM (顯存)** | 顯卡的記憶體。影片模型很吃 VRAM,你的 ≤12GB 對 5B 來說夠用。 |
-| **OOM** | Out Of Memory,顯存不夠用的錯誤。解法:降解析度、縮短影片長度。 |
-| **safetensors** | 模型檔的安全格式,副檔名 `.safetensors`,直接放進對應資料夾即可。 |
-
-> 看到不懂的節點或名詞,可直接查 **[ComfyUI 官方文件](https://docs.comfy.org/)** 或本檔最後的[社群資源](#10-找不到答案官方文件--社群資源)。
+> Wan2.2-TI2V-5B × ComfyUI 一鍵安裝包 —— Ubuntu **22.04 / 24.04 / 26.04** (**x86_64** 或 **aarch64**) + **NVIDIA RTX**
+>
+> 為新手寫的腳本與文件:全程冪等(可重複執行),所有 HuggingFace 網址與安裝邏輯都已實測驗證。
 
 ---
 
-## 1. 這個模型是什麼 (Wan2.2-TI2V-5B)
+## 目錄
 
-- **TI2V = Text & Image to Video**:同一個模型,可以「文字→影片」也可以「圖片→影片」。
-- **5B** = 50 億參數,是 Wan2.2 系列裡**最輕量**的版本,專為消費級顯卡設計。
-- 用**高壓縮 Wan2.2-VAE**,所以小顯卡也能輸出 **720p @ 24fps、約 5 秒 (121 格)**。
-- 官方針對 720p 調校,**不支援 480p** (低解析度只建議拿來「測試跑不跑得動」)。
-- 它是**單一模型**,不像 14B 版那種「高噪 + 低噪」雙專家結構 —— 這點很重要,影響你能不能用某些 LoRA (見[第 9 節](#9-lora-放哪--用途-進階))。
+- [這個專案是什麼](#這個專案是什麼)
+- [系統需求](#系統需求)
+- [安裝(從這裡開始)](#安裝從這裡開始)
+- [啟動 ComfyUI](#啟動-comfyui)
+- [在介面裡產生第一支影片](#在介面裡產生第一支影片)
+- [專案檔案說明](#專案檔案說明)
+- [完整資料夾架構(每個資料夾放什麼)](#完整資料夾架構每個資料夾放什麼)
+- [下載更多模型(可選)](#下載更多模型可選)
+- [進階選項](#進階選項)
+- [可重複執行(idempotent)說明](#可重複執行idempotent說明)
+- [已驗證項目](#已驗證項目)
+- [常見問題](#常見問題)
+- [更多文件](#更多文件)
+- [來源與致謝](#來源與致謝)
+- [授權](#授權)
 
 ---
 
-## 2. 你需要準備什麼
+## 這個專案是什麼
+
+- 把 [Wan2.2-TI2V-5B](https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B)(50 億參數的影片生成模型)
+  自動部署到本機 [ComfyUI](https://github.com/comfyanonymous/ComfyUI),從零環境到能跑只要一條指令。
+- TI2V-5B 同時支援**文字→影片(T2V)** 與 **圖片→影片(I2V)**,輸出 **720p @ 24fps、約 5 秒**,
+  官方稱 **8GB VRAM** 就跑得動;12GB 卡跑起來相當輕鬆。
+- 內建多個 14B 變體選項(t2v / i2v / animate / s2v / Fun control/inpaint/camera/vace / ChronoEdit / 4-step 閃電 LoRA),
+  以及完整的 **75 個官方 HuggingFace 檔案目錄**(全部 HTTP 驗證過)。
+
+---
+
+## 系統需求
 
 | 項目 | 需求 |
 |---|---|
-| 作業系統 | **Ubuntu 22.04 / 24.04 / 26.04** (全部已在 amd64 容器實測;aarch64 也支援) |
-| 顯卡 | NVIDIA RTX,建議 ≥ 8GB;你的 ≤12GB **夠用** |
-| 驅動 | NVIDIA 驅動 (建議 ≥ 550)。用 `nvidia-smi` 確認;沒裝看 [安裝手冊.md](安裝手冊.md) 第 2 節 |
-| 硬碟空間 | 模型 ~17GB + ComfyUI/套件 ~8GB,**預留 30GB** |
-| 網路 | 下載模型約 17GB |
+| 作業系統 | **Ubuntu 22.04 / 24.04 / 26.04** (三個版本都在 amd64 容器實測過) |
+| CPU 架構 | **x86_64** 或 **aarch64** (PyTorch cu128 兩種架構都有 manylinux 輪子) |
+| GPU | NVIDIA RTX,VRAM ≥ 8GB(12GB 充裕);驅動 ≥ 550 |
+| 硬碟 | 預留 **30GB+**(主程式 + 17GB 模型),裝 14B 變體要更多 |
+| Python | 系統預設 `python3` 即可(腳本相容 3.10–3.14) |
+| 網路 | 下載模型約 17GB(可續傳) |
 
-### 架構與版本相容性 (已在 Ubuntu 26.04 實測)
-
-- **CPU 架構**:**x86_64 與 aarch64 都支援**。PyTorch cu128 的 manylinux 輪子涵蓋 x86_64 與 aarch64
-  (cp310–cp314 皆有),所以 Intel/AMD x86 主機與 NVIDIA Grace Hopper/Jetson Orin 等 ARM Linux 都能跑。
-- **apt 套件名稱**與 CPU 架構無關 (Ubuntu multiarch),x86 與 ARM 用同樣的套件名。
-- **Python**:三個 Ubuntu LTS 預設版本都跑得動 —— Ubuntu 22.04→Python 3.10、24.04→3.12、26.04→3.14,
-  PyTorch cu128 全部有對應輪子,腳本會自動使用系統預設的 `python3`,**不需要 deadsnakes PPA**。
-- **顯卡**:`cu128` 支援 RTX 30/40/50 全系列;若卡較舊可 `TORCH_CUDA=cu124 ./install.sh`。
-- **Ubuntu t64 改名**:24.04+ 把部分套件改成 `*t64` 後綴(time_t 64-bit 轉換)。install.sh 已偵測,舊名也能裝。
+> 想跑 14B 變體要更多 VRAM(fp8 量化版 12GB 可勉強);純 5B 在 8–12GB 都順。
 
 ---
 
-## 3. 快速開始
+## 安裝(從這裡開始)
 
-### 最簡單:一鍵全自動 (推薦新手)
-
-```bash
-cd ~/WAN2.2          # 進到放腳本的資料夾
-chmod +x *.sh        # 給腳本執行權限 (只需做一次)
-./setup.sh           # 自動完成:安裝環境 → 下載模型 → 顯示啟動方式
-./start.sh           # 啟動,然後瀏覽器開 http://127.0.0.1:8188
-```
-
-`setup.sh` 會依序跑 `install.sh` 與 `download_models.sh`,全程**可重複執行**(已裝/已下載的自動略過)。
-中途斷掉?直接再跑一次 `./setup.sh` 即可續做。
-
-### 想分步驟跑
+### 1. Clone 這個 repo
 
 ```bash
-./install.sh          # 1. 安裝 ComfyUI + PyTorch(CUDA) + 相依套件
-./download_models.sh  # 2. 下載 3 個模型檔 (約 17GB,可續傳)
-./start.sh            # 3. 啟動 ComfyUI
+git clone https://github.com/<your-username>/WAN2.2-ComfyUI-Installer.git
+cd WAN2.2-ComfyUI-Installer
 ```
 
-> 其他用法:`./setup.sh --no-models`(只裝環境)、`./setup.sh --start`(裝完直接啟動)、`./install.sh --with-models`(裝完順便下載)。
+> 把 `<your-username>` 換成實際的 GitHub 帳號。
+
+### 2. 給腳本執行權限(只需一次)
+
+```bash
+chmod +x *.sh
+```
+
+### 3. 一鍵安裝 + 下載模型
+
+```bash
+./setup.sh
+```
+
+`setup.sh` 會依序:
+1. 偵測 Ubuntu 版本與 CPU 架構
+2. 安裝系統相依套件(`git`, `ffmpeg`, `build-essential`, `python3-venv`, `aria2`, …)
+3. clone ComfyUI 主程式
+4. 建立 Python 虛擬環境(`ComfyUI/.venv/`)
+5. 安裝對應架構/版本的 PyTorch CUDA 輪子(預設 cu128)
+6. 安裝 ComfyUI 的 Python 相依套件
+7. 下載 Wan2.2-TI2V-5B 三個模型檔(主模型 + 文字編碼器 + VAE,共約 17GB)
+
+裝完最後會印:
+```
+✅ 全部就緒!
+啟動 ComfyUI:
+    ./start.sh
+然後瀏覽器開:http://127.0.0.1:8188
+```
+
+> **如果有任何一步失敗**:直接重跑 `./setup.sh`,已完成的會自動略過,只補沒完成的部分。
+
+### 其他安裝模式
+
+```bash
+./setup.sh --no-models                 # 只裝環境,先不下載 17GB 模型
+./setup.sh --start                     # 裝完直接啟動 ComfyUI
+./setup.sh --14b-t2v                   # 預設 5B + 加裝 14B 文生影片 (~28GB)
+./setup.sh --all                       # 5B + 14B t2v + 14B i2v + 4-step LoRA
+./install.sh                           # 只跑安裝,不下載模型
+./download_models.sh --list            # 列出所有可下載的模型旗標
+```
 
 ---
 
-## 3.1 啟動與使用 ComfyUI (新手必讀)
+## 啟動 ComfyUI
 
-裝完之後(或之後每一次要用),只要這兩個動作:
+### 第一次啟動(剛裝完)
 
 ```bash
-cd ~/WAN2.2
-./start.sh                  # 啟動伺服器
+./start.sh
 ```
 
-終端機會出現類似:
+### 第二次以後(重開機 / 關掉終端後想再開)
+
+```bash
+cd ~/WAN2.2-ComfyUI-Installer    # 回到專案資料夾
+./start.sh                       # 直接啟動,不需要再裝
+```
+
+> **不用再跑 `./setup.sh` 或 `./install.sh`** —— 那些只是裝環境,裝過就好。
+> 每次要用就 `./start.sh` 一條指令。
+
+終端機會看到:
 ```
 ==> 啟動 ComfyUI:http://127.0.0.1:8188
     (Ctrl+C 結束)
 ```
 
-**接著**:
-1. **開瀏覽器** → 進 `http://127.0.0.1:8188` → 看到 ComfyUI 介面。
-2. 左上 **Workflow → Browse Templates → Video** → 選 **「Wan2.2 5B」**(或對應你裝的模型)。
-3. 點 **Queue** / **Run** 按鈕 → 等進度條跑完。
-4. 影片會在 `ComfyUI/output/` 出現,瀏覽器介面也會預覽。
+打開瀏覽器進 [http://127.0.0.1:8188](http://127.0.0.1:8188) 即可開始用。
+**要結束**:回終端機按 **Ctrl+C**;下次想用再 `./start.sh`。
 
-要結束:回終端機按 **Ctrl+C**。
-
-| 啟動小技巧 | 指令 |
+| 啟動選項 | 用途 |
 |---|---|
-| 一般啟動 | `./start.sh` |
-| 顯存吃緊(自動把權重 offload 到 RAM/磁碟) | `./start.sh --lowvram` |
-| 開放區網其他電腦/手機連入 | `./start.sh --listen` → 用本機 IP + `:8188` 連 |
-| 換 port (例如 9000) | `PORT=9000 ./start.sh` |
-| 啟用 Sage Attention 加速 | `./start.sh --use-sage-attention` (要先 `pip install sageattention`) |
+| `./start.sh` | 一般啟動 |
+| `./start.sh --lowvram` | 顯存吃緊時(自動把權重 offload 到 RAM/磁碟) |
+| `./start.sh --novram` | 極省 VRAM(很慢,通常用不到) |
+| `./start.sh --listen` | 開放區網其他電腦/手機從本機 IP 連入 |
+| `PORT=9000 ./start.sh` | 換 port |
+| `./start.sh --use-sage-attention` | 啟用 Sage Attention 加速(需先 `pip install sageattention`) |
 
 ---
 
-## 3.2 這個安裝包有哪些檔案 (每個檔案在幹嘛)
+## 在介面裡產生第一支影片
 
-| 檔案 | 作用 | 你需要做什麼 |
-|---|---|---|
-| **setup.sh** | 總入口,一鍵跑完安裝+下載 | **新手執行這個就好** |
-| **install.sh** | 安裝 ComfyUI、PyTorch(CUDA)、系統相依套件;可重複執行 | 由 setup.sh 呼叫,或單獨跑 |
-| **download_models.sh** | 下載模型(支援 5B / 14B 多種變體與 LoRA;hf/aria2/wget 自動擇優,可續傳) | 由 setup.sh 呼叫,或單獨跑 |
-| **start.sh** | 啟動 ComfyUI 伺服器 (支援 `--lowvram` / `--listen`) | **每次要用時執行** |
-| **README.md** | 本檔:總覽、資料夾結構、模型/LoRA 說明 | 先看這個 |
-| **安裝手冊.md** | 最詳細的逐步教學 + 疑難排解 + 驅動安裝 | 卡關時看 |
-| **模型清單.md** | 75 個官方 Wan2.2/2.1 模型/LoRA/VAE 完整目錄(全 URL 驗證過) | 想裝更多模型時查 |
-| **風格與參數預設.md** | 照抄就能用的提示詞與參數配方 | 生成時參考 |
-
-> 執行後會多出一個 `ComfyUI/` 資料夾(主程式與模型都在裡面),結構見下一節。
-
----
-
-## 4. 完整資料夾架構 (每個資料夾放什麼)
-
-ComfyUI 靠 `models/` 底下的**子資料夾名稱**分類模型,**放錯資料夾在介面上就找不到**。
-★ = 跑 TI2V-5B 必備:
-
-```
-ComfyUI/
-├── main.py                     # ComfyUI 主程式 (start.sh 會啟動它)
-├── .venv/                      # Python 虛擬環境 (install.sh 建立)
-├── input/                      # 放「圖生影片」要用的輸入圖片
-├── output/                     # ★ 生成的影片/圖片會存在這裡
-├── custom_nodes/               # 第三方擴充節點 (例如 ComfyUI-Manager)
-├── user/                       # 你的工作流 (.json)、介面設定
-└── models/
-    ├── diffusion_models/       # ★ 主模型。介面 "Load Diffusion Model" 讀這裡
-    │   └── wan2.2_ti2v_5B_fp16.safetensors
-    ├── text_encoders/          # ★ 文字編碼器。介面 "Load CLIP" 讀這裡
-    │   └── umt5_xxl_fp8_e4m3fn_scaled.safetensors
-    ├── vae/                    # ★ VAE。介面 "Load VAE" 讀這裡
-    │   └── wan2.2_vae.safetensors
-    ├── loras/                  # LoRA (選用,5B 預設空的)。"LoraLoader" 讀這裡
-    ├── clip_vision/            # 影像編碼器 (某些 I2V 用;TI2V-5B 不需要)
-    └── audio_encoders/         # 音訊編碼器 (只有 S2V 語音生影片才用)
-```
-
-`download_models.sh` 會自動把 3 個必備檔放到正確位置,其餘資料夾預設留空。
-
----
-
-## 5. 用哪個模型 + 哪個 VAE?(一句話版)
-
-**只要這三個檔,不多不少:**
-
-| 角色 | 檔名 | 放這個資料夾 |
-|---|---|---|
-| 主模型 | `wan2.2_ti2v_5B_fp16.safetensors` | `models/diffusion_models/` |
-| 文字編碼器 | `umt5_xxl_fp8_e4m3fn_scaled.safetensors` | `models/text_encoders/` |
-| **VAE** | `wan2.2_vae.safetensors` | `models/vae/` |
-
-> VAE 一定要用 **`wan2.2_vae.safetensors`** (Wan2.2 專用高壓縮 VAE)。
-> **不要**用 Wan2.1 的舊 VAE 或 SD/SDXL 的 VAE —— 會輸出黑畫面或雜訊。
-
----
-
-## 6. 每個檔案的用途 + 實際下載網址 (皆驗證回應 200)
-
-| 檔案 | 大小 | 用途 |
-|---|---|---|
-| `wan2.2_ti2v_5B_fp16.safetensors` | ~10GB | **主模型**:真正生成每一格畫面。官方只提供 fp16,無 fp8。 |
-| `umt5_xxl_fp8_e4m3fn_scaled.safetensors` | ~6.7GB | **文字編碼器**:把 prompt 轉成向量。fp8 量化省記憶體,與 Wan2.1 共用。 |
-| `wan2.2_vae.safetensors` | ~0.5GB | **VAE**:潛空間↔像素轉換。高壓縮,讓小顯卡能出 720p。 |
-
-```
-# 主模型 → models/diffusion_models/
-https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors
-
-# 文字編碼器 → models/text_encoders/
-https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
-
-# VAE → models/vae/
-https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan2.2_vae.safetensors
-```
-
-來源 repo:[Comfy-Org/Wan_2.2_ComfyUI_Repackaged](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged)(官方為 ComfyUI 重新打包的版本)
-
----
-
-## 7. 最小驗證架構 (先確認「跑得起來」)
-
-新手第一步**不要追求畫質**,先用最小組合確認整條流程通了。最小組合只需要:
-
-```
-✅ ComfyUI 已安裝        (./install.sh)
-✅ 上面那 3 個模型檔     (./download_models.sh)
-✅ 官方 "Wan2.2 5B" 範本工作流
-✅ 一次小設定的測試生成
-```
-
-**這四項就能驗證成功,以下東西「現在都不需要」**:
-ComfyUI-Manager、LoRA、Sage Attention、clip_vision、audio_encoders、放大/補幀外掛。
-
-### 怎麼算「驗證成功」?
-1. 瀏覽器打開 `http://127.0.0.1:8188` 看得到 ComfyUI 介面。
-2. 載入官方 5B 範本,按 **Queue / Run** 後**沒有紅色錯誤框**。
-3. 跑完後 `ComfyUI/output/` 出現一個 `.mp4` 或 `.webp` 影片檔。
-
-做到這 3 點 = 環境完全 OK,之後就能放心調畫質、加東西。
-
-### 第一次測試建議用「省記憶體」設定 (見[第 8 節](#8-在-comfyui-產生第一支影片) 表格右欄)
-解析度 832×480、長度 49 格、Steps 20 —— 先求快、求成功,再放大。
-
----
-
-## 8. 在 ComfyUI 產生第一支影片
-
-1. 啟動後,左上選單 → **Workflow → Browse Templates → Video**。
-2. 點 **「Wan2.2 5B video generation」**(或寫 5B TI2V 的那個)載入。
-3. 確認 3 個載入節點對到正確檔案:
+1. 左上選單 **Workflow → Browse Templates → Video**
+2. 點 **「Wan2.2 5B」**(或對應你裝的模型)載入範本
+3. 確認三個載入節點對到正確檔案:
    - **Load Diffusion Model** → `wan2.2_ti2v_5B_fp16.safetensors`
-   - **Load CLIP** (type 選 `wan`) → `umt5_xxl_fp8_e4m3fn_scaled.safetensors`
+   - **Load CLIP**(type: `wan`) → `umt5_xxl_fp8_e4m3fn_scaled.safetensors`
    - **Load VAE** → `wan2.2_vae.safetensors`
-4. **文字生影片**:在正向提示詞框輸入描述 (英文通常效果較好,可加鏡頭運動關鍵字)。
-   **圖片生影片**:把起始圖放到 `ComfyUI/input/`,在 Load Image 節點選它,接到對應輸入。
-5. 按 **Queue / Run**,等進度條跑完。影片在 `ComfyUI/output/`。
+4. **文生影片**:在正向提示詞欄輸入英文描述(可加鏡頭運動關鍵字,例如 `slow dolly in`)
+   **圖生影片**:把起始圖放到 `ComfyUI/input/`,在 `Load Image` 節點選它
+5. 點 **Queue / Run** → 等進度條跑完 → 影片在 `ComfyUI/output/`
 
-> 第一次跑較慢 (要把模型載進記憶體);同一次開著的 session,之後會快很多。
-
-### 建議生成參數
-
-| 參數 | 正式輸出 (720p) | 第一次測試 (求成功) |
-|---|---|---|
-| 解析度 | 1280×704 (橫) / 704×1280 (直) | 832×480 或 640×640 |
-| 長度 (frames) | 121 (=5 秒) | 49–81 |
-| FPS | 24 | 24 |
-| Steps | 30 | 20 |
-| CFG | 5.0 | 5.0 |
-| Sampler / Scheduler | uni_pc / simple | euler / simple |
-| Shift (ModelSamplingSD3) | 8.0 | 5–8 |
-
-調參鐵則:**一次只改一個數值**,看效果再改下一個。
-**OOM 時**:先降解析度 → 再縮短長度 → 最後 `./start.sh --lowvram`。
+完整提示詞公式、風格關鍵字、三組參數配方(測試/平衡/高畫質)請看
+[風格與參數預設.md](風格與參數預設.md)。
 
 ---
 
-## 9. 跑起來之後「可以加什麼」(選用加值)
+## 專案檔案說明
 
-### 9.0 加裝更大/更多模型 (download_models.sh 旗標)
+| 檔案 | 作用 |
+|---|---|
+| `setup.sh` | **總入口**:一鍵跑完安裝 + 下載 + 顯示啟動方式 |
+| `install.sh` | 安裝環境:系統套件 + ComfyUI + venv + PyTorch CUDA |
+| `download_models.sh` | 下載模型:清單驅動,支援 15 種旗標(5B/14B 全變體) |
+| `start.sh` | 啟動 ComfyUI 伺服器 |
+| `README.md` | 本檔:總覽、安裝、使用 |
+| [安裝手冊.md](安裝手冊.md) | 詳細逐步教學 + 疑難排解 + 冪等原理 |
+| [模型清單.md](模型清單.md) | 75 個官方 Wan2.2/2.1 模型完整目錄(HTTP 驗證過) |
+| [風格與參數預設.md](風格與參數預設.md) | 提示詞公式、風格關鍵字、參數配方 |
 
-`download_models.sh` 預設只裝 5B (~17GB);要加裝其他變體,加旗標即可。
-旗標可疊用,且**已下載/已完整的檔案會自動略過,不會重抓**。
+---
+
+## 完整資料夾架構(每個資料夾放什麼)
+
+安裝後會多出 `ComfyUI/` 子資料夾,結構如下(★ = 跑 TI2V-5B 必備):
+
+```
+WAN2.2-ComfyUI-Installer/
+├── setup.sh                ← 你執行這個
+├── install.sh
+├── download_models.sh
+├── start.sh
+├── README.md / 安裝手冊.md / 模型清單.md / 風格與參數預設.md
+└── ComfyUI/                ← install.sh 建立
+    ├── main.py             ← ComfyUI 主程式
+    ├── .venv/              ← Python 虛擬環境
+    ├── input/              ← 「圖生影片」要用的輸入圖片放這
+    ├── output/             ← ★ 產出的影片/圖片在這
+    ├── custom_nodes/       ← 第三方擴充節點 (e.g. ComfyUI-Manager)
+    ├── user/               ← 你的工作流 JSON、UI 設定
+    └── models/
+        ├── diffusion_models/  ← ★ 主模型 (UNet/DiT 權重)
+        │   └── wan2.2_ti2v_5B_fp16.safetensors
+        ├── text_encoders/     ← ★ 文字編碼器 (umT5-XXL)
+        │   └── umt5_xxl_fp8_e4m3fn_scaled.safetensors
+        ├── vae/               ← ★ VAE (像素↔潛空間 轉換)
+        │   └── wan2.2_vae.safetensors
+        ├── loras/             ← LoRA 微調權重(預設空,跑 5B 用不到)
+        ├── clip_vision/       ← Wan2.1 部分 I2V 工作流需要
+        └── audio_encoders/    ← S2V 聲音→影片才需要
+```
+
+ComfyUI 靠 `models/` 底下的**子資料夾名稱**自動分類,放錯資料夾在介面上會找不到。
+`download_models.sh` 會自動放到正確位置。
+
+---
+
+## 下載更多模型(可選)
+
+預設只裝 5B (~17GB);旗標可疊用,**已下載且完整的會自動略過**:
 
 ```bash
-./download_models.sh --14b-t2v             # +14B 文生影片 fp8 雙專家 (~28GB)
-./download_models.sh --14b-i2v             # +14B 圖生影片 fp8 雙專家 (~28GB)
-./download_models.sh --14b-fast            # +14B 4-step 閃電 LoRA (~5GB,大幅加速 14B)
-./download_models.sh --14b-animate         # +14B 角色動畫 (~35GB)
-./download_models.sh --14b-s2v             # +14B 聲音→影片 + 音訊編碼器 (~16GB)
-./download_models.sh --14b-fun-control     # +14B Fun ControlNet 風格控制 (~28GB)
-./download_models.sh --14b-fun-inpaint     # +14B Fun 局部重繪 (~28GB)
-./download_models.sh --14b-fun-camera      # +14B Fun 攝影機運鏡 (~30GB)
-./download_models.sh --14b-fun-vace        # +14B Fun VACE 影片編輯 (~33GB)
-./download_models.sh --chrono-edit         # +ChronoEdit 影片編輯 (~32GB)
-./download_models.sh --textenc-fp16        # 文字編碼器升級為 fp16 (+5GB,品質微升)
-./download_models.sh --clip-vision         # +clip_vision_h (Wan2.1 I2V 部分工作流需要)
-./download_models.sh --wan21-vae           # +Wan2.1 VAE (相容性備援)
-./download_models.sh --rgba-lora           # +Wan2.1 RGBA 透明影片 LoRA
-./download_models.sh --all                 # 5B + 14B t2v + 14B i2v + 14B fast (綜合包)
-./download_models.sh --everything          # 全部變體 (>150GB,慎用)
-./download_models.sh --list                # 列出所有可用旗標與檔案大小
+./download_models.sh --14b-t2v             # 14B 文生影片 fp8 雙專家 (~28GB)
+./download_models.sh --14b-i2v             # 14B 圖生影片 fp8 雙專家 (~28GB)
+./download_models.sh --14b-fast            # 14B 4-step 閃電加速 LoRA (~5GB)
+./download_models.sh --14b-animate         # 14B 角色動畫 (~35GB)
+./download_models.sh --14b-s2v             # 14B 聲音→影片 + 音訊編碼器 (~16GB)
+./download_models.sh --14b-fun-control     # 14B Fun ControlNet (~28GB)
+./download_models.sh --14b-fun-inpaint     # 14B Fun 局部重繪 (~28GB)
+./download_models.sh --14b-fun-camera      # 14B Fun 攝影機運鏡 (~30GB)
+./download_models.sh --14b-fun-vace        # 14B Fun VACE 影片編輯 (~33GB)
+./download_models.sh --chrono-edit         # ChronoEdit 影片編輯 (~32GB)
+./download_models.sh --textenc-fp16        # 文字編碼器升級為 fp16 (+5GB)
+./download_models.sh --clip-vision         # clip_vision_h
+./download_models.sh --wan21-vae           # Wan2.1 VAE (相容性備援)
+./download_models.sh --rgba-lora           # Wan2.1 RGBA 透明影片 LoRA
+./download_models.sh --all                 # 5B + 14B t2v + 14B i2v + 4-step LoRA
+./download_models.sh --everything          # 全部 (注意:>150GB)
+./download_models.sh --list                # 列出所有旗標 + 每個檔案大小
 ```
 
-> **12GB VRAM 建議**:預設 5B + 想加速 14B 時加 `--14b-t2v` 或 `--14b-i2v` + `--14b-fast`。
-> 14B 必須用 fp8 量化版才放得進 12GB;fp16 版要 24GB 以上的卡才合理。
+> 完整 75 個檔案的目錄、大小、URL、用途,看 [模型清單.md](模型清單.md)(全部 HTTP 驗證過)。
 >
-> 完整 75 個檔案的目錄、用途、URL 看 **[模型清單.md](模型清單.md)**(全部驗證過存在且可下載)。
+> 12GB VRAM 建議:`./download_models.sh --14b-t2v --14b-fast` 或 `--14b-i2v --14b-fast`,
+> 用 4-step LoRA 大幅縮短生成時間。
 
-### 9.1 其他加值(由易到難)
+---
 
-| 加值項目 | 做什麼 | 怎麼加 |
+## 進階選項
+
+| 想做什麼 | 怎麼做 |
+|---|---|
+| 換 CUDA 版本(舊驅動) | `TORCH_CUDA=cu124 ./install.sh`(預設 `cu128`) |
+| 改 ComfyUI 安裝位置 | `COMFY_DIR=/data/ComfyUI ./install.sh` |
+| 安裝缺失節點 / 第三方擴充 | 裝 [ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI-Manager) 到 `ComfyUI/custom_nodes/` |
+| 加速生成 | `pip install sageattention` → `./start.sh --use-sage-attention` |
+| 影片放大 / 補幀 | 透過 ComfyUI-Manager 裝 upscale / RIFE 類節點 |
+
+---
+
+## 可重複執行(idempotent)說明
+
+所有腳本都設計成**可放心重跑**:
+
+- `install.sh` 用 `dpkg -s` + `apt-get install -s` 雙重檢查(處理 Ubuntu 24.04+ 的 `*t64` 改名);ComfyUI 有就 `git pull`,venv 健康才重用,PyTorch 用 `torch.version.cuda` 比對「實際的 CUDA 版本」是否與你要的相符。
+- `download_models.sh` 對每個檔案比對「存在 + 大小 ≥ 門檻」,完整則略過;否則 `hf` > `aria2c` > `wget` **續傳**而非重抓。
+- `setup.sh` 只是依序呼叫上面兩支,本身無狀態。
+
+中斷或想更新?直接重跑 `./setup.sh` 即可。
+
+---
+
+## 已驗證項目
+
+| 驗證內容 | 方法 | 結果 |
 |---|---|---|
-| **ComfyUI-Manager** | 一鍵安裝缺失節點/擴充,新手強烈建議 | 把 [Comfy-Org/ComfyUI-Manager](https://github.com/Comfy-Org/ComfyUI-Manager) clone 到 `ComfyUI/custom_nodes/`,重啟 |
-| **Sage Attention** | 明顯加速生成 | `source ComfyUI/.venv/bin/activate && pip install sageattention`,再 `./start.sh --use-sage-attention` |
-| **更高解析度 / 更長影片** | 衝畫質 (吃更多 VRAM) | 在工作流調大解析度/frames,搭配 `--lowvram` |
-| **GGUF 量化版** | 給 6–8GB 更小顯卡用 (你 12GB 用不到) | 參考社群教學 [Next Diffusion: Wan2.2 GGUF 低顯存](https://www.nextdiffusion.ai/tutorials/how-to-run-wan22-image-to-video-gguf-models-in-comfyui-low-vram) |
-| **影片放大 / 補幀** | 提高解析度或補到 60fps | 透過 ComfyUI-Manager 裝 upscale / RIFE 類節點 |
-| **5B 專屬加速工作流** | distill/lightning 少步數加速 | 找**標明 5B** 的工作流 (見下方 LoRA 警告) |
+| HuggingFace 模型 URL | HTTP HEAD(200 + Content-Length>0) | **75 / 75 通過** |
+| Ubuntu 22.04 安裝 | docker amd64 容器端到端 RUN#1 + RUN#2 | 通過 |
+| Ubuntu 24.04 安裝 | docker amd64 容器端到端 | 通過(t64 自動處理) |
+| Ubuntu 26.04 安裝 | docker amd64 容器三輪測試(冪等 + torch skip) | 通過 |
+| PyTorch cu128 輪子矩陣 | curl 索引頁 | cp310–cp314 × {x86_64, aarch64, Windows} 全部存在 |
+| 腳本 bash 語法 | `bash 5 -n` + `shellcheck` (severity=warning) | 全部 OK |
 
 ---
 
-## 9.1 LoRA 放哪 + 用途 (進階)
+## 常見問題
 
-- **放置位置**:`ComfyUI/models/loras/`,工作流中用 **LoraLoader** 節點載入。
-- **TI2V-5B 預設不需要 LoRA** 就能生影片;它只是選用的風格/加速外掛。
+| 症狀 | 解法 |
+|---|---|
+| `nvidia-smi` 找不到 | `sudo ubuntu-drivers autoinstall && sudo reboot`,再重跑 `./setup.sh` |
+| `CUDA OOM` 顯存不足 | 降解析度 → 縮短 frames → `./start.sh --lowvram` |
+| 模型下載中斷 | 直接重跑 `./download_models.sh`,會自動續傳 |
+| ComfyUI 介面找不到 Wan2.2 範本 | 重跑 `./install.sh`(會 `git pull` 更新 ComfyUI) |
+| 輸出全黑 / 雜訊 | 檢查 VAE 是否載對 `wan2.2_vae.safetensors`、CFG/Shift 不要太極端 |
+| port 8188 被占用 | `PORT=9000 ./start.sh` |
+| venv 半毀(`python: not found`) | 已自動處理,但若要手動:`rm -rf ComfyUI/.venv && ./install.sh` |
 
-### ⚠️ 官方現有的 Wan2.2 LoRA 全部是 14B 用的,不是 5B!
-
-我查了官方 [Comfy-Org/Wan_2.2_ComfyUI_Repackaged](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged) 的 `loras/` 資料夾,
-裡面**沒有 5B 專屬 LoRA**。以下都是 **14B 雙專家 (high/low noise)** 用的,**套到 5B 不會正確運作**:
-
-| LoRA 檔名 | 適用 | 用途 |
-|---|---|---|
-| `wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors` | 14B T2V | 4 步加速,high-noise |
-| `wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors` | 14B T2V | 4 步加速,low-noise |
-| `wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors` | 14B I2V | 4 步加速,high-noise |
-| `wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors` | 14B I2V | 4 步加速,low-noise |
-| `wan2.2_animate_14B_relight_lora_bf16.safetensors` | 14B Animate | 角色動畫重打光 |
-| `chronoedit_distill_lora.safetensors` | 14B ChronoEdit | 影片編輯蒸餾加速 |
-
-> **結論**:你跑 5B 時 `loras/` 保持空的即可。要加速請找**檔名/說明標明「5B」或「TI2V-5B」**的權重,
-> **不要**直接拿上面這些 14B LoRA。下載任何 LoRA 前,先確認它對應的是 5B 還是 14B。
+更多疑難排解見 [安裝手冊.md 第 10 節](安裝手冊.md#10-疑難排解)。
 
 ---
 
-## 10. 找不到答案?官方文件 & 社群資源
+## 更多文件
 
-**遇到不懂的節點、參數、錯誤,先查這些 (全部驗證過存在):**
-
-### 官方
-- [ComfyUI 官方 Wan2.2 教學](https://docs.comfy.org/tutorials/video/wan/wan2_2) — 最權威,含 5B 設定
-- [ComfyUI 官方文件首頁](https://docs.comfy.org/) — 查任何節點/功能
-- [ComfyUI 5B TI2V 範本工作流](https://www.comfy.org/workflows/video_wan2_2_5B_ti2v-f83ee3caa04e/)
-- [ComfyUI_examples：Wan2.2](https://comfyanonymous.github.io/ComfyUI_examples/wan22/) — 作者親自寫的範例
-- [ComfyUI 原始碼 (GitHub)](https://github.com/comfyanonymous/ComfyUI)
-- [Wan2.2 官方 repo (GitHub)](https://github.com/Wan-Video/Wan2.2) — 模型作者
-- [Wan-AI/Wan2.2-TI2V-5B (Hugging Face)](https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B) — 原始模型卡
-
-### 社群 (別人怎麼做)
-- [ComfyUI Wiki：Wan2.2 完整工作流指南](https://comfyui-wiki.com/en/tutorial/advanced/video/wan2.2/wan2-2) — 官方+社群 (Kijai/GGUF) 比較
-- [Next Diffusion：Wan2.2 GGUF 低顯存教學](https://www.nextdiffusion.ai/tutorials/how-to-run-wan22-image-to-video-gguf-models-in-comfyui-low-vram)
-- [ComfyUI-Manager (擴充管理器)](https://github.com/Comfy-Org/ComfyUI-Manager)
-
-### 工具
-- 想自己加擴充/補缺失節點 → 先裝 **ComfyUI-Manager**,介面上搜尋安裝最省事。
+- **[安裝手冊.md](安裝手冊.md)** —— 詳細逐步教學、NVIDIA 驅動安裝、疑難排解、冪等原理
+- **[模型清單.md](模型清單.md)** —— 75 個官方 Wan2.2 / 2.1 模型的完整目錄(全部 HTTP 驗證)
+- **[風格與參數預設.md](風格與參數預設.md)** —— 提示詞公式、風格關鍵字、三組參數配方
 
 ---
 
-## 11. 延伸文件
+## 來源與致謝
 
-- **[安裝手冊.md](安裝手冊.md)** — 驅動安裝、Python 版本、疑難排解、加速設定的完整逐步版。
-- **[風格與參數預設.md](風格與參數預設.md)** — 照抄就能用的提示詞公式、風格關鍵字、三組參數配方 (測試/平衡/高畫質)。
+- **ComfyUI**:[comfyanonymous/ComfyUI](https://github.com/comfyanonymous/ComfyUI) — 節點式 UI
+- **Wan2.2**:[Wan-Video/Wan2.2](https://github.com/Wan-Video/Wan2.2) — 模型作者
+- **HuggingFace repo**:
+  - [Comfy-Org/Wan_2.2_ComfyUI_Repackaged](https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged)
+  - [Comfy-Org/Wan_2.1_ComfyUI_repackaged](https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged)
+- **官方教學**:[ComfyUI Docs: Wan2.2](https://docs.comfy.org/tutorials/video/wan/wan2_2)
+- **社群參考**:
+  - [ComfyUI Wiki: Wan2.2 Workflow Guide](https://comfyui-wiki.com/en/tutorial/advanced/video/wan2.2/wan2-2)
+  - [Next Diffusion: Wan2.2 GGUF 低顯存](https://www.nextdiffusion.ai/tutorials/how-to-run-wan22-image-to-video-gguf-models-in-comfyui-low-vram)
+
+---
+
+## 授權
+
+腳本與文件採 [MIT License](https://opensource.org/licenses/MIT)。
+模型本身的授權請依各 HuggingFace 模型頁面為準(主要是 Apache-2.0)。
