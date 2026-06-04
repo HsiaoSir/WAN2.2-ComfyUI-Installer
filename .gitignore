@@ -1,0 +1,30 @@
+# ComfyUI 主程式與所有模型 (由 install.sh / download_models.sh 自動產生/下載)
+ComfyUI/
+
+# 任何模型權重檔 (避免不小心 commit 進來)
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+*.ckpt
+
+# Python 暫存
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# 編輯器/系統垃圾
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# 備份 / sed 中間檔
+*.bak
+*.orig
+*.tmp
