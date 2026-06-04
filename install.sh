@@ -52,10 +52,21 @@ have() { command -v "$1" >/dev/null 2>&1; }
 # =============================================================================
 info "步驟 0/7:檢查作業系統環境"
 [[ "$(uname -s)" == "Linux" ]] || die "這個腳本只能在 Linux (Ubuntu) 上執行。"
+ARCH="$(uname -m)"
+case "$ARCH" in
+  x86_64|aarch64) : ;;
+  *) warn "未測過的 CPU 架構:$ARCH (本腳本在 x86_64 與 aarch64 已驗證)" ;;
+esac
 if [[ -r /etc/os-release ]]; then
+  # shellcheck disable=SC1091
   . /etc/os-release
-  ok "OS: ${PRETTY_NAME:-unknown}"
+  ok "OS: ${PRETTY_NAME:-unknown} | 架構: $ARCH"
   [[ "${ID:-}" == "ubuntu" ]] || warn "偵測到非 Ubuntu 發行版 (${ID:-?}),腳本仍會嘗試執行。"
+  case "${VERSION_ID:-}" in
+    22.04|24.04|26.04) ok "Ubuntu $VERSION_ID 在本腳本已驗證可用(amd64 容器測過)。" ;;
+    "") warn "讀不到 VERSION_ID,可能不是標準 Ubuntu。" ;;
+    *)  warn "未在容器測過 Ubuntu $VERSION_ID,理論上應該也能跑。" ;;
+  esac
 fi
 have sudo || die "找不到 sudo,請先安裝或以具備權限的帳號執行。"
 

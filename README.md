@@ -39,7 +39,7 @@
 
 | 項目 | 需求 |
 |---|---|
-| 作業系統 | Ubuntu 24.04 / 26.04 (64-bit) |
+| 作業系統 | **Ubuntu 22.04 / 24.04 / 26.04** (全部已在 amd64 容器實測;aarch64 也支援) |
 | 顯卡 | NVIDIA RTX,建議 ≥ 8GB;你的 ≤12GB **夠用** |
 | 驅動 | NVIDIA 驅動 (建議 ≥ 550)。用 `nvidia-smi` 確認;沒裝看 [安裝手冊.md](安裝手冊.md) 第 2 節 |
 | 硬碟空間 | 模型 ~17GB + ComfyUI/套件 ~8GB,**預留 30GB** |
@@ -47,12 +47,13 @@
 
 ### 架構與版本相容性 (已在 Ubuntu 26.04 實測)
 
-- **CPU 架構**:本安裝包針對 **x86_64 (Intel/AMD)**。PyTorch 的 CUDA 輪子 (cu128) 只有 x86_64 版,
-  ARM Linux 沒有 —— 所以這套**要跑在 x86_64 機器**上(你的 Intel 主機 ✓)。
+- **CPU 架構**:**x86_64 與 aarch64 都支援**。PyTorch cu128 的 manylinux 輪子涵蓋 x86_64 與 aarch64
+  (cp310–cp314 皆有),所以 Intel/AMD x86 主機與 NVIDIA Grace Hopper/Jetson Orin 等 ARM Linux 都能跑。
 - **apt 套件名稱**與 CPU 架構無關 (Ubuntu multiarch),x86 與 ARM 用同樣的套件名。
-- **Python**:Ubuntu 26.04 預設是 **Python 3.14**,而 PyTorch cu128 已有 3.14 (cp314) 的 x86_64 輪子,
-  所以**直接能用**,腳本不需要你另外裝舊版 Python。
-- **顯卡**:`cu128` 支援 RTX 30/40/50 全系列;若卡較舊可在安裝時用 `TORCH_CUDA=cu124 ./install.sh`。
+- **Python**:三個 Ubuntu LTS 預設版本都跑得動 —— Ubuntu 22.04→Python 3.10、24.04→3.12、26.04→3.14,
+  PyTorch cu128 全部有對應輪子,腳本會自動使用系統預設的 `python3`,**不需要 deadsnakes PPA**。
+- **顯卡**:`cu128` 支援 RTX 30/40/50 全系列;若卡較舊可 `TORCH_CUDA=cu124 ./install.sh`。
+- **Ubuntu t64 改名**:24.04+ 把部分套件改成 `*t64` 後綴(time_t 64-bit 轉換)。install.sh 已偵測,舊名也能裝。
 
 ---
 
