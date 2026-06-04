@@ -1,5 +1,15 @@
 # WAN2.2-ComfyUI-Installer
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%20%7C%2024.04%20%7C%2026.04-E95420?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![Arch](https://img.shields.io/badge/Arch-x86__64%20%7C%20aarch64-blue)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer)
+[![Python](https://img.shields.io/badge/Python-3.10--3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-cu128-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![ComfyUI](https://img.shields.io/badge/ComfyUI-native-1A1A1A?logo=github&logoColor=white)](https://github.com/comfyanonymous/ComfyUI)
+[![HF Models Verified](https://img.shields.io/badge/HF%20URLs-75%2F75%20verified-FFD21E?logo=huggingface&logoColor=black)](模型清單.md)
+[![Last commit](https://img.shields.io/github/last-commit/HsiaoSir/WAN2.2-ComfyUI-Installer)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer/commits/main)
+[![Stars](https://img.shields.io/github/stars/HsiaoSir/WAN2.2-ComfyUI-Installer?style=social)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer/stargazers)
+
 > Wan2.2-TI2V-5B × ComfyUI 一鍵安裝包 —— Ubuntu **22.04 / 24.04 / 26.04** (**x86_64** 或 **aarch64**) + **NVIDIA RTX**
 >
 > 為新手寫的腳本與文件:全程冪等(可重複執行),所有 HuggingFace 網址與安裝邏輯都已實測驗證。
