@@ -57,11 +57,9 @@
 ### 1. Clone 這個 repo
 
 ```bash
-git clone https://github.com/<your-username>/WAN2.2-ComfyUI-Installer.git
+git clone https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer.git
 cd WAN2.2-ComfyUI-Installer
 ```
-
-> 把 `<your-username>` 換成實際的 GitHub 帳號。
 
 ### 2. 給腳本執行權限(只需一次)
 
