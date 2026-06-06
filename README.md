@@ -43,7 +43,7 @@
 - TI2V-5B 同時支援**文字→影片(T2V)** 與 **圖片→影片(I2V)**,輸出 **720p @ 24fps、約 5 秒**,
   官方稱 **8GB VRAM** 就跑得動;12GB 卡跑起來相當輕鬆。
 - 內建多個 14B 變體選項(t2v / i2v / animate / s2v / Fun control/inpaint/camera/vace / ChronoEdit / 4-step 閃電 LoRA),
-  以及完整的 **75 個官方 HuggingFace 檔案目錄**(全部 HTTP 驗證過)。
+  以及完整的 **75 個官方 HuggingFace 檔案目錄**(全部 HTTP 驗證過;另有 21 個 Kijai/lightx2v/RIFE/upscaler/GFPGAN 等社群相依模型,用 ./download_models.sh --list 看完整列表)。
 
 ---
 
@@ -260,20 +260,51 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 ./download_models.sh --recipe wan22-i2v-with-upscale  # 一鍵裝 I2V + 4x 升頻 + RIFE 補幀
 ```
 
-10 個內建 recipe(全部 URL 已 HTTP HEAD 驗證):
+**24 個內建 recipe**(全部 URL 已 HTTP HEAD 驗證 200 + Content-Length>0):
 
+#### Wan2.2 基礎(常用)
 | Recipe | 內含 tags | 適用情境 |
 |---|---|---|
-| `wan22-5b-fast` | `5b 5b-fast-fastwan` | 5B + 4-step 加速 LoRA(5B 唯一一個) |
-| `wan22-i2v-with-upscale` | `14b-i2v 14b-fast upscale-ultrasharp upscale-realesrgan-x4 interp-rife-426` | I2V 完整 pipeline (生成+升頻+補幀) |
-| `wan22-t2v-fast-interp` | `14b-t2v 14b-fast interp-rife-426 interp-film` | T2V + 補幀雙選項 |
-| `wan22-animate-native` | `14b-animate 14b-animate-lightx2v clip-vision wan21-vae` | 官方 ComfyUI Animate workflow (bf16) |
-| `wan22-animate-kijai-lowvram` | `14b-animate-kijai 14b-animate-lightx2v clip-vision wan21-vae` | Kijai fp8 Animate (16–24GB VRAM 用) |
-| `wan22-faces-postprocess` | `face-gfpgan face-codeformer face-detect face-parsing upscale-ultrasharp` | 收尾:臉部修復 + upscale |
-| `wan22-upscale-pack` | 9 個 upscaler | 所有主流 4x/2x 升頻包 |
-| `wan22-interp-pack` | 7 個 RIFE/FILM 補幀 | 所有主流補幀模型 |
-| `wan22-t2v-lightning-alt` | `14b-t2v 14b-fast-seko-v11` | T2V + Seko V1.1 (lightx2v 替代) |
-| `wan22-i2v-lightx2v-1022` | `14b-i2v 14b-fast-lightx2v-i2v-v1022` | I2V + 2025-10-22 版 lightx2v |
+| `wan22-5b-fast` | `5b 5b-fast-fastwan` | 5B + 4-step 加速 LoRA(**5B 唯一的 fast LoRA**) |
+| `wan22-5b-upscale-interp` | 5b + fast + 2 upscalers + RIFE | 5B + HD 升頻 + 補幀完整流水線 |
+| `wan22-i2v-with-upscale` | 14B I2V + fast + ultrasharp + realesrgan + RIFE | I2V 完整 pipeline (生成+升頻+補幀) |
+| `wan22-i2v-face-restore` | 14B I2V + fast + face-* + ultrasharp + RIFE | I2V + 臉部修復後處理 |
+| `wan22-t2v-fast-interp` | 14B T2V + fast + RIFE + FILM | T2V + 雙補幀模型 |
+| `wan22-animate-native` | 14B Animate bf16 + lightx2v + clip_vision + wan21-vae | 官方 ComfyUI Animate workflow |
+| `wan22-animate-kijai-lowvram` | Kijai fp8 Animate + lightx2v + clip_vision + wan21-vae | Kijai fp8 Animate (16–24GB VRAM) |
+
+#### Wan2.2 特殊變體
+| Recipe | 用途 |
+|---|---|
+| `wan22-s2v-talking-head` | Wan2.2 S2V 音訊驅動口型同步影片 |
+| `wan22-chrono-edit` | NVIDIA ChronoEdit 14B 影像/影片編輯 |
+| `wan22-fun-control` | Fun-Control 14B(pose / depth / edge condition) |
+| `wan22-fun-inpaint-fflf` | Fun-Inpaint 首末幀 / 局部修補 |
+| `wan22-fun-camera` | Fun-Camera 鏡頭軌跡控制 |
+| `wan22-fun-vace` | Fun-VACE 主體驅動影片編輯 |
+
+#### Lightning / 加速替代版
+| Recipe | 用途 |
+|---|---|
+| `wan22-t2v-lightning-alt` | T2V + Seko V1.1 (lightx2v 替代) |
+| `wan22-t2v-fast-seko-v2` | T2V + **Seko V2.0**(2026 最新) + RIFE |
+| `wan22-i2v-lightx2v-1022` | I2V + 2025-10-22 版 lightx2v LoRA |
+| `wan22-i2v-lightx2v-260412` | I2V + **2026-04-12 版 720p lightx2v** + 升頻 + 補幀 |
+| `wan22-blackwell-nvfp4` | **RTX 50 / Blackwell 專用**:NVFP4 sparse t2v+i2v(~16GB 主模型,只在 sm_100+ 可用) |
+
+#### 進階 / Kijai WanVideoWrapper 系列
+| Recipe | 用途 |
+|---|---|
+| `wan22-ovi-i2v-audio` | **Wan2.2 5B Ovi**(同時生影片+音訊,Kijai 版) |
+| `wan22-fun-control-pose-depth-kijai` | Kijai Fun-Control fp8 + DepthAnythingV2 |
+| `wan21-infinitetalk-i2v` | Wan2.1 InfiniteTalk(多人對嘴影片)+ 中文 wav2vec2 |
+
+#### 工具包(只裝一類)
+| Recipe | 用途 |
+|---|---|
+| `wan22-upscale-pack` | 9 個 upscaler(RealESRGAN/UltraSharp/Remacri/NMKD/SwinIR) |
+| `wan22-interp-pack` | 7 個 RIFE/FILM 補幀模型 |
+| `wan22-faces-postprocess` | GFPGAN + CodeFormer + face detect + ultrasharp |
 
 ### 步驟 3 (進階):直接選 tag
 
@@ -321,7 +352,7 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 下載期間 ComfyUI 不用關;**裝完後在瀏覽器介面右上 Refresh 一下,新模型就出現在 Load 節點的下拉選單裡**。
 或者在終端機按 `Ctrl+C` 停掉 ComfyUI,再 `./start.sh` 重啟也行。
 
-> 完整 75 個官方檔案目錄看 [模型清單.md](模型清單.md)(全部 HTTP 驗證過);
+> 完整 75 個官方 Comfy-Org repo 檔案看 [模型清單.md](模型清單.md)(全部 HTTP 驗證過;另有 21 個 Kijai/lightx2v/RIFE/upscaler/GFPGAN 等社群相依模型,用 ./download_models.sh --list 看完整列表);
 > 32 個新增的工作流相依模型(含 Kijai / lightx2v / RealESRGAN / RIFE / GFPGAN 等)的完整網址與大小,
 > 用 `./download_models.sh --list` 查。
 

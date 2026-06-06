@@ -132,6 +132,43 @@ MANIFEST=(
   "face-restoreformer|https://github.com/TencentARC/GFPGAN/releases/download/v1.3.4/RestoreFormer.pth|facerestore_models|RestoreFormer.pth|282066944"
   "face-detect|https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth|facedetection|detection_Resnet50_Final.pth|100663296"
   "face-parsing|https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth|facedetection|parsing_parsenet.pth|76808192"
+
+  # ===== 2026-Q4 新增:更新版 Lightning / Distill LoRA =====
+  "14b-fast-seko-v20|https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V2.0/high_noise_model.safetensors|loras|Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V2.0_high_noise_model.safetensors|1193422992"
+  "14b-fast-seko-v20|https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V2.0/low_noise_model.safetensors|loras|Wan2.2-T2V-A14B-4steps-lora-rank64-Seko-V2.0_low_noise_model.safetensors|1193422992"
+  "14b-fast-lightx2v-i2v-260412|https://huggingface.co/obsxrver/wan2.2-i2v-lightx2v-260412/resolve/main/wan2.2_i2v_A14b_high_noise_lora_rank64_lightx2v_4step_720p_260412.safetensors|loras|wan2.2_i2v_A14b_high_noise_lora_rank64_lightx2v_4step_720p_260412.safetensors|582842404"
+  "14b-fast-lightx2v-i2v-260412|https://huggingface.co/obsxrver/wan2.2-i2v-lightx2v-260412/resolve/main/wan2.2_i2v_A14b_low_noise_lora_rank64_lightx2v_4step_720p_260412.safetensors|loras|wan2.2_i2v_A14b_low_noise_lora_rank64_lightx2v_4step_720p_260412.safetensors|582842404"
+
+  # ===== NVFP4 Sparse (Blackwell / RTX 50 系列專用) =====
+  "14b-t2v-nvfp4-sparse|https://huggingface.co/lightx2v/Wan2.2-NVFP4-Sparse/resolve/main/Wan2.2-T2V-A14B_NVFP4_Sparse_high_comfy.safetensors|diffusion_models|Wan2.2-T2V-A14B_NVFP4_Sparse_high_comfy.safetensors|8345545192"
+  "14b-t2v-nvfp4-sparse|https://huggingface.co/lightx2v/Wan2.2-NVFP4-Sparse/resolve/main/Wan2.2-T2V-A14B_NVFP4_Sparse_low_comfy.safetensors|diffusion_models|Wan2.2-T2V-A14B_NVFP4_Sparse_low_comfy.safetensors|8345545192"
+  "14b-i2v-nvfp4-sparse|https://huggingface.co/lightx2v/Wan2.2-NVFP4-Sparse/resolve/main/Wan2.2-I2V-A14B_NVFP4_Sparse_high_comfy.safetensors|diffusion_models|Wan2.2-I2V-A14B_NVFP4_Sparse_high_comfy.safetensors|8346364392"
+  "14b-i2v-nvfp4-sparse|https://huggingface.co/lightx2v/Wan2.2-NVFP4-Sparse/resolve/main/Wan2.2-I2V-A14B_NVFP4_Sparse_low_comfy.safetensors|diffusion_models|Wan2.2-I2V-A14B_NVFP4_Sparse_low_comfy.safetensors|8346364392"
+
+  # ===== Wan2.2 5B Ovi (TI2V + Audio,Kijai 重打包) =====
+  "5b-ovi-video|https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/TI2V/Ovi/Wan2_2-5B-Ovi_960x960_10s_fp8_e4m3fn_scaled_KJ.safetensors|diffusion_models|Wan2_2-5B-Ovi_960x960_10s_fp8_e4m3fn_scaled_KJ.safetensors|12341119544"
+  "ovi-mmaudio-vae|https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Ovi/mmaudio_vae_16k_bf16.safetensors|vae|mmaudio_vae_16k_bf16.safetensors|326154893"
+  "ovi-mmaudio-vocoder|https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Ovi/mmaudio_vocoder_bigvgan_best_netG_bf16.safetensors|vae|mmaudio_vocoder_bigvgan_best_netG_bf16.safetensors|213323484"
+
+  # ===== Kijai 版 Fun-Control (與既有 Comfy-Org 版並存,不同來源) =====
+  "14b-fun-control-kijai|https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/Fun/Wan2_2-Fun-Control-A14B-HIGH_fp8_e4m3fn_scaled_KJ_fixed.safetensors|diffusion_models|Wan2_2-Fun-Control-A14B-HIGH_fp8_e4m3fn_scaled_KJ_fixed.safetensors|14496941346"
+  "14b-fun-control-kijai|https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/Fun/Wan2_2-Fun-Control-A14B-LOW_fp8_e4m3fn_scaled_KJ_fixed.safetensors|diffusion_models|Wan2_2-Fun-Control-A14B-LOW_fp8_e4m3fn_scaled_KJ_fixed.safetensors|14496941346"
+
+  # ===== Depth Anything V2 (Fun-Control 用的 depth conditioning) =====
+  "depth-anything-v2-vitl|https://huggingface.co/Kijai/DepthAnythingV2-safetensors/resolve/main/depth_anything_v2_vitl_fp16.safetensors|depthanything|depth_anything_v2_vitl_fp16.safetensors|637141069"
+
+  # ===== InfiniteTalk (Wan2.1 base, 多人講話對嘴影片) =====
+  "infinitetalk-single|https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/InfiniteTalk/Wan2_1-InfiniteTalk-Single_fp8_e4m3fn_scaled_KJ.safetensors|diffusion_models|Wan2_1-InfiniteTalk-Single_fp8_e4m3fn_scaled_KJ.safetensors|2679993778"
+  "infinitetalk-multi|https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/InfiniteTalk/Wan2_1-InfiniteTalk-Multi_fp8_e4m3fn_scaled_KJ.safetensors|diffusion_models|Wan2_1-InfiniteTalk-Multi_fp8_e4m3fn_scaled_KJ.safetensors|2679174658"
+  "wav2vec2-chinese|https://huggingface.co/Kijai/wav2vec2_safetensors/resolve/main/wav2vec2-chinese-base_fp16.safetensors|wav2vec2|wav2vec2-chinese-base_fp16.safetensors|180609599"
+  "melband-roformer|https://huggingface.co/Kijai/MelBandRoFormer_comfy/resolve/main/MelBandRoformer_fp16.safetensors|diffusion_models|MelBandRoformer_fp16.safetensors|433655118"
+
+  # ===== Kijai bf16 text encoder (Kijai wrapper workflow 指定版) =====
+  "umt5-bf16-kijai|https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors|text_encoders|umt5-xxl-enc-bf16.safetensors|11328291032"
+
+  # ===== Kijai 版 S2V + LongCat Avatar =====
+  "14b-s2v-kijai|https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/S2V/Wan2_2-S2V-14B_fp8_e4m3fn_scaled_KJ.safetensors|diffusion_models|Wan2_2-S2V-14B_fp8_e4m3fn_scaled_KJ.safetensors|16619776188"
+  "longcat-avatar-single|https://huggingface.co/Kijai/LongCat-Video_comfy/resolve/main/Avatar/LongCat-Avatar-single_fp8_e4m3fn_scaled_mixed_KJ.safetensors|diffusion_models|LongCat-Avatar-single_fp8_e4m3fn_scaled_mixed_KJ.safetensors|16862843224"
 )
 
 # =============================================================================
@@ -139,6 +176,7 @@ MANIFEST=(
 # 格式:declare -A RECIPES; RECIPES[name]="tag1 tag2 ..."
 # =============================================================================
 declare -A RECIPES=(
+  # 既有 10 個
   [wan22-5b-fast]="5b 5b-fast-fastwan"
   [wan22-i2v-with-upscale]="14b-i2v 14b-fast upscale-ultrasharp upscale-realesrgan-x4 interp-rife-426"
   [wan22-t2v-fast-interp]="14b-t2v 14b-fast interp-rife-426 interp-film"
@@ -149,6 +187,24 @@ declare -A RECIPES=(
   [wan22-interp-pack]="interp-rife-426 interp-rife-426-heavy interp-rife-425 interp-rife-425-lite interp-rife-425-heavy interp-rife-49 interp-film"
   [wan22-t2v-lightning-alt]="14b-t2v 14b-fast-seko-v11"
   [wan22-i2v-lightx2v-1022]="14b-i2v 14b-fast-lightx2v-i2v-v1022"
+
+  # 2026-Q4 新增 8 個 (純既有 tag,不依賴新模型)
+  [wan22-s2v-talking-head]="14b-s2v 14b-fast wan21-vae"
+  [wan22-chrono-edit]="chrono-edit wan21-vae"
+  [wan22-fun-control]="14b-fun-control 14b-fast wan21-vae"
+  [wan22-fun-inpaint-fflf]="14b-fun-inpaint 14b-fast wan21-vae"
+  [wan22-fun-camera]="14b-fun-camera 14b-fast wan21-vae"
+  [wan22-fun-vace]="14b-fun-vace 14b-fast wan21-vae"
+  [wan22-5b-upscale-interp]="5b 5b-fast-fastwan upscale-realesrgan-x4 upscale-realesrgan-x2 interp-rife-426"
+  [wan22-i2v-face-restore]="14b-i2v 14b-fast face-gfpgan face-codeformer face-detect face-parsing upscale-ultrasharp interp-rife-426"
+
+  # 2026-Q4 新增 6 個 (用到新增的 tag)
+  [wan22-t2v-fast-seko-v2]="14b-t2v 14b-fast-seko-v20 interp-rife-426"
+  [wan22-i2v-lightx2v-260412]="14b-i2v 14b-fast-lightx2v-i2v-260412 interp-rife-426 upscale-ultrasharp"
+  [wan22-blackwell-nvfp4]="14b-t2v-nvfp4-sparse 14b-i2v-nvfp4-sparse 14b-fast interp-rife-426"
+  [wan22-ovi-i2v-audio]="5b-ovi-video ovi-mmaudio-vae ovi-mmaudio-vocoder umt5-bf16-kijai"
+  [wan22-fun-control-pose-depth-kijai]="14b-fun-control-kijai depth-anything-v2-vitl 14b-fast wan21-vae umt5-bf16-kijai"
+  [wan21-infinitetalk-i2v]="infinitetalk-single wav2vec2-chinese melband-roformer 14b-fast-lightx2v-i2v-v1022 clip-vision wan21-vae umt5-bf16-kijai"
 )
 
 ALL_TAGS=(5b 14b-t2v 14b-i2v 14b-fast 14b-animate 14b-animate-kijai 14b-animate-lightx2v 14b-s2v
@@ -161,7 +217,14 @@ ALL_TAGS=(5b 14b-t2v 14b-i2v 14b-fast 14b-animate 14b-animate-kijai 14b-animate-
           interp-rife-425-heavy interp-rife-49 interp-film
           5b-fast-fastwan 14b-fast-lightx2v-t2v-v1217 14b-fast-lightx2v-i2v-v1022
           14b-fast-seko-v11 14b-fast-kijai
-          face-gfpgan face-codeformer face-restoreformer face-detect face-parsing)
+          face-gfpgan face-codeformer face-restoreformer face-detect face-parsing
+          # 2026-Q4 新增
+          14b-fast-seko-v20 14b-fast-lightx2v-i2v-260412
+          14b-t2v-nvfp4-sparse 14b-i2v-nvfp4-sparse
+          5b-ovi-video ovi-mmaudio-vae ovi-mmaudio-vocoder
+          14b-fun-control-kijai depth-anything-v2-vitl
+          infinitetalk-single infinitetalk-multi wav2vec2-chinese melband-roformer
+          umt5-bf16-kijai 14b-s2v-kijai longcat-avatar-single)
 
 # =============================================================================
 # 顯示工具
@@ -358,7 +421,7 @@ info "下載方式:$DL_METHOD"
 info "將下載 tags:$selected"
 
 # 預先建立所有可能用到的子資料夾
-mkdir -p "$MODELS_DIR"/{diffusion_models,text_encoders,vae,loras,clip_vision,audio_encoders,upscale_models,interpolation,facerestore_models,facedetection}
+mkdir -p "$MODELS_DIR"/{diffusion_models,text_encoders,vae,loras,clip_vision,audio_encoders,upscale_models,interpolation,facerestore_models,facedetection,depthanything,wav2vec2}
 
 # =============================================================================
 # 下載核心
@@ -415,7 +478,7 @@ done
 
 echo
 ok "全部模型就緒。各子資料夾現況:"
-for d in diffusion_models text_encoders vae loras clip_vision audio_encoders upscale_models interpolation facerestore_models facedetection; do
+for d in diffusion_models text_encoders vae loras clip_vision audio_encoders upscale_models interpolation facerestore_models facedetection depthanything wav2vec2; do
   if [[ -d "$MODELS_DIR/$d" ]] && [[ -n "$(ls -A "$MODELS_DIR/$d" 2>/dev/null)" ]]; then
     echo "   $MODELS_DIR/$d/"
     # shellcheck disable=SC2012
