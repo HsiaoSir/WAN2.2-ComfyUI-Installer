@@ -251,31 +251,69 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 
 會印出全部旗標 + 每個檔案大小。
 
-### 步驟 3:選一個或多個旗標跑下載
+### 步驟 3 (新手推薦):用 **Recipe** 一鍵裝整套工作流相依
+
+不熟悉哪個 tag 對哪個工作流?直接挑一個 recipe,它會把該工作流的所有相依(diffusion + LoRA + clip_vision + VAE + upscaler + 補幀模型 ... )一起裝好:
 
 ```bash
-# 最常用的(12GB VRAM 推薦)
-./download_models.sh --14b-t2v --14b-fast   # 14B 文生影片 + 4-step 加速 (~33GB)
+./download_models.sh --list-recipes            # 先看有哪些 recipe
+./download_models.sh --recipe wan22-i2v-with-upscale  # 一鍵裝 I2V + 4x 升頻 + RIFE 補幀
+```
 
-# 或單獨選
-./download_models.sh --14b-t2v             # 14B 文生影片 fp8 雙專家 (~28GB)
-./download_models.sh --14b-i2v             # 14B 圖生影片 fp8 雙專家 (~28GB)
-./download_models.sh --14b-fast            # 14B 4-step 閃電加速 LoRA (~5GB)
-./download_models.sh --14b-animate         # 14B 角色動畫 (~35GB)
-./download_models.sh --14b-s2v             # 14B 聲音→影片 + 音訊編碼器 (~16GB)
-./download_models.sh --14b-fun-control     # 14B Fun ControlNet (~28GB)
-./download_models.sh --14b-fun-inpaint     # 14B Fun 局部重繪 (~28GB)
-./download_models.sh --14b-fun-camera      # 14B Fun 攝影機運鏡 (~30GB)
-./download_models.sh --14b-fun-vace        # 14B Fun VACE 影片編輯 (~33GB)
-./download_models.sh --chrono-edit         # ChronoEdit 影片編輯 (~32GB)
-./download_models.sh --textenc-fp16        # 文字編碼器升級為 fp16 (+5GB)
-./download_models.sh --clip-vision         # clip_vision_h
-./download_models.sh --wan21-vae           # Wan2.1 VAE (相容性備援)
-./download_models.sh --rgba-lora           # Wan2.1 RGBA 透明影片 LoRA
+10 個內建 recipe(全部 URL 已 HTTP HEAD 驗證):
 
-# 一鍵包
-./download_models.sh --all                 # 5B + 14B t2v + 14B i2v + 4-step LoRA
-./download_models.sh --everything          # 全部 (注意:>150GB)
+| Recipe | 內含 tags | 適用情境 |
+|---|---|---|
+| `wan22-5b-fast` | `5b 5b-fast-fastwan` | 5B + 4-step 加速 LoRA(5B 唯一一個) |
+| `wan22-i2v-with-upscale` | `14b-i2v 14b-fast upscale-ultrasharp upscale-realesrgan-x4 interp-rife-426` | I2V 完整 pipeline (生成+升頻+補幀) |
+| `wan22-t2v-fast-interp` | `14b-t2v 14b-fast interp-rife-426 interp-film` | T2V + 補幀雙選項 |
+| `wan22-animate-native` | `14b-animate 14b-animate-lightx2v clip-vision wan21-vae` | 官方 ComfyUI Animate workflow (bf16) |
+| `wan22-animate-kijai-lowvram` | `14b-animate-kijai 14b-animate-lightx2v clip-vision wan21-vae` | Kijai fp8 Animate (16–24GB VRAM 用) |
+| `wan22-faces-postprocess` | `face-gfpgan face-codeformer face-detect face-parsing upscale-ultrasharp` | 收尾:臉部修復 + upscale |
+| `wan22-upscale-pack` | 9 個 upscaler | 所有主流 4x/2x 升頻包 |
+| `wan22-interp-pack` | 7 個 RIFE/FILM 補幀 | 所有主流補幀模型 |
+| `wan22-t2v-lightning-alt` | `14b-t2v 14b-fast-seko-v11` | T2V + Seko V1.1 (lightx2v 替代) |
+| `wan22-i2v-lightx2v-1022` | `14b-i2v 14b-fast-lightx2v-i2v-v1022` | I2V + 2025-10-22 版 lightx2v |
+
+### 步驟 3 (進階):直接選 tag
+
+```bash
+# Wan2.2 主模型
+./download_models.sh --14b-t2v              # 14B 文生影片 fp8 (~28GB)
+./download_models.sh --14b-i2v              # 14B 圖生影片 fp8 (~28GB)
+./download_models.sh --14b-fast             # 14B 4-step 閃電 LoRA (~5GB)
+./download_models.sh --14b-animate          # 14B 角色動畫 bf16 (~35GB)
+./download_models.sh --14b-animate-kijai    # Kijai fp8 Animate (~18GB)
+./download_models.sh --14b-s2v              # 14B 聲音→影片 (~16GB)
+./download_models.sh --14b-fun-{control,inpaint,camera,vace}
+./download_models.sh --chrono-edit          # ChronoEdit 影片編輯 (~32GB)
+
+# 進階 Lightning / Distill LoRAs(2025-Q4 新版)
+./download_models.sh --5b-fast-fastwan      # 5B 唯一的 4-step LoRA
+./download_models.sh --14b-fast-lightx2v-t2v-v1217   # 2025-12-17 版
+./download_models.sh --14b-fast-lightx2v-i2v-v1022   # 2025-10-22 版
+./download_models.sh --14b-fast-seko-v11             # Seko V1.1
+./download_models.sh --14b-fast-kijai                # Kijai 重打包
+
+# 升頻 (4x/2x,放到 ComfyUI/models/upscale_models/)
+./download_models.sh --upscale-ultrasharp / -ultrasharp-v2 / -remacri
+./download_models.sh --upscale-realesrgan-x4 / -x2 / -anime
+./download_models.sh --upscale-nmkd-siax / -nmkd-superscale / -swinir-x4
+
+# 影格插補 (RIFE + FILM,放到 ComfyUI/models/interpolation/)
+./download_models.sh --interp-rife-426 / -426-heavy / -425 / -49 / -film
+
+# 臉部修復 (放到 facerestore_models/ 與 facedetection/)
+./download_models.sh --face-gfpgan / --face-codeformer / --face-restoreformer
+./download_models.sh --face-detect --face-parsing  # 偵測 + parsing 模型 (前兩者必備)
+
+# 工具
+./download_models.sh --list                 # 列出所有可用 tag + 檔案大小
+./download_models.sh --list-recipes         # 列出所有 recipe + 內含 tags
+./download_models.sh --menu                 # 交互式選單 (新手友善)
+./download_models.sh --all                  # 5B + 14B t2v + 14B i2v + 4-step (常用組合)
+./download_models.sh --everything           # 所有 Wan2.2 主模型 (>150GB,慎用)
+./download_models.sh --no-5b                # 不裝 5B (只裝 14B 時用)
 ```
 
 ### 步驟 4:裝完直接用,不用重啟
@@ -283,7 +321,9 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 下載期間 ComfyUI 不用關;**裝完後在瀏覽器介面右上 Refresh 一下,新模型就出現在 Load 節點的下拉選單裡**。
 或者在終端機按 `Ctrl+C` 停掉 ComfyUI,再 `./start.sh` 重啟也行。
 
-> 完整 75 個檔案的目錄、大小、URL、用途,看 [模型清單.md](模型清單.md)(全部 HTTP 驗證過)。
+> 完整 75 個官方檔案目錄看 [模型清單.md](模型清單.md)(全部 HTTP 驗證過);
+> 32 個新增的工作流相依模型(含 Kijai / lightx2v / RealESRGAN / RIFE / GFPGAN 等)的完整網址與大小,
+> 用 `./download_models.sh --list` 查。
 
 ---
 
