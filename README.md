@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10--3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-cu128-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-native-1A1A1A?logo=github&logoColor=white)](https://github.com/comfyanonymous/ComfyUI)
-[![HF Models Verified](https://img.shields.io/badge/HF%20URLs-75%2F75%20verified-FFD21E?logo=huggingface&logoColor=black)](模型清單.md)
+[![HF Models Verified](https://img.shields.io/badge/HF%20URLs-82%2F82%20verified-FFD21E?logo=huggingface&logoColor=black)](模型清單.md)
 [![Last commit](https://img.shields.io/github/last-commit/HsiaoSir/WAN2.2-ComfyUI-Installer)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer/commits/main)
 [![Stars](https://img.shields.io/github/stars/HsiaoSir/WAN2.2-ComfyUI-Installer?style=social)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer/stargazers)
 
@@ -43,7 +43,7 @@
 - TI2V-5B 同時支援**文字→影片(T2V)** 與 **圖片→影片(I2V)**,輸出 **720p @ 24fps、約 5 秒**,
   官方稱 **8GB VRAM** 就跑得動;12GB 卡跑起來相當輕鬆。
 - 內建多個 14B 變體選項(t2v / i2v / animate / s2v / Fun control/inpaint/camera/vace / ChronoEdit / 4-step 閃電 LoRA),
-  以及完整的 **75 個官方 HuggingFace 檔案目錄**(全部 HTTP 驗證過;另有 21 個 Kijai/lightx2v/RIFE/upscaler/GFPGAN 等社群相依模型,用 ./download_models.sh --list 看完整列表)。
+  以及完整的 **82 個 HuggingFace 檔案 + 24 個 workflow recipe**(包含官方 Comfy-Org 重打包 + Kijai/lightx2v/RIFE/upscaler/GFPGAN 等社群相依模型,全部 HTTP HEAD 驗證 200 + Content-Length>0;用 `./download_models.sh --list` 或 `--list-recipes` 看完整列表)。
 
 ---
 
@@ -187,11 +187,11 @@ cd ~/WAN2.2-ComfyUI-Installer    # 回到專案資料夾
 |---|---|
 | `setup.sh` | **總入口**:一鍵跑完安裝 + 下載 + 顯示啟動方式 |
 | `install.sh` | 安裝環境:系統套件 + ComfyUI + venv + PyTorch CUDA |
-| `download_models.sh` | 下載模型:清單驅動,支援 15 種旗標(5B/14B 全變體) |
+| `download_models.sh` | 下載模型:清單驅動,**82 個檔案 + 59 個 tag + 24 個 recipe**(5B/14B 全變體) |
 | `start.sh` | 啟動 ComfyUI 伺服器 |
 | `README.md` | 本檔:總覽、安裝、使用 |
 | [安裝手冊.md](安裝手冊.md) | 詳細逐步教學 + 疑難排解 + 冪等原理 |
-| [模型清單.md](模型清單.md) | 75 個官方 Wan2.2/2.1 模型完整目錄(HTTP 驗證過) |
+| [模型清單.md](模型清單.md) | 82 個 Wan2.2/2.1 + 社群模型完整目錄(HTTP 驗證過) |
 | [風格與參數預設.md](風格與參數預設.md) | 提示詞公式、風格關鍵字、參數配方 |
 
 ---
@@ -352,9 +352,9 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 下載期間 ComfyUI 不用關;**裝完後在瀏覽器介面右上 Refresh 一下,新模型就出現在 Load 節點的下拉選單裡**。
 或者在終端機按 `Ctrl+C` 停掉 ComfyUI,再 `./start.sh` 重啟也行。
 
-> 完整 75 個官方 Comfy-Org repo 檔案看 [模型清單.md](模型清單.md)(全部 HTTP 驗證過;另有 21 個 Kijai/lightx2v/RIFE/upscaler/GFPGAN 等社群相依模型,用 ./download_models.sh --list 看完整列表);
-> 32 個新增的工作流相依模型(含 Kijai / lightx2v / RealESRGAN / RIFE / GFPGAN 等)的完整網址與大小,
-> 用 `./download_models.sh --list` 查。
+> 全部 82 個檔案的完整網址與大小,用 `./download_models.sh --list` 查;
+> 24 個 workflow recipe 內含哪些 tag,用 `./download_models.sh --list-recipes` 查。
+> 官方 Comfy-Org / Kijai / lightx2v / RealESRGAN / RIFE / GFPGAN 等社群來源全部收齊。
 
 ---
 
@@ -375,7 +375,7 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 所有腳本都設計成**可放心重跑**:
 
 - `install.sh` 用 `dpkg -s` + `apt-get install -s` 雙重檢查(處理 Ubuntu 24.04+ 的 `*t64` 改名);ComfyUI 有就 `git pull`,venv 健康才重用,PyTorch 用 `torch.version.cuda` 比對「實際的 CUDA 版本」是否與你要的相符。
-- `download_models.sh` 對每個檔案比對「存在 + 大小 ≥ 門檻」,完整則略過;否則 `hf` > `aria2c` > `wget` **續傳**而非重抓。
+- `download_models.sh` 對每個檔案比對「存在 + 大小 ≥ 門檻」,完整則略過;否則用 `aria2c` > `curl` > `wget` 依序擇優(都支援 `-c` / `-C -` **續傳**而非重抓)。
 - `setup.sh` 只是依序呼叫上面兩支,本身無狀態。
 
 中斷或想更新?直接重跑 `./setup.sh` 即可。
@@ -386,7 +386,7 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 
 | 驗證內容 | 方法 | 結果 |
 |---|---|---|
-| HuggingFace 模型 URL | HTTP HEAD(200 + Content-Length>0) | **75 / 75 通過** |
+| HuggingFace 模型 URL | HTTP HEAD(200 + Content-Length>0) | **82 / 82 通過** |
 | Ubuntu 22.04 安裝 | docker amd64 容器端到端 RUN#1 + RUN#2 | 通過 |
 | Ubuntu 24.04 安裝 | docker amd64 容器端到端 | 通過(t64 自動處理) |
 | Ubuntu 26.04 安裝 | docker amd64 容器三輪測試(冪等 + torch skip) | 通過 |
@@ -414,7 +414,7 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 ## 更多文件
 
 - **[安裝手冊.md](安裝手冊.md)** —— 詳細逐步教學、NVIDIA 驅動安裝、疑難排解、冪等原理
-- **[模型清單.md](模型清單.md)** —— 75 個官方 Wan2.2 / 2.1 模型的完整目錄(全部 HTTP 驗證)
+- **[模型清單.md](模型清單.md)** —— 82 個 Wan2.2 / 2.1 + 社群模型的完整目錄(全部 HTTP 驗證)
 - **[風格與參數預設.md](風格與參數預設.md)** —— 提示詞公式、風格關鍵字、三組參數配方
 
 ---

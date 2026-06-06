@@ -19,24 +19,42 @@ c_grn=$'\e[32m'; c_blu=$'\e[36m'; c_reset=$'\e[0m'
 step() { echo; echo "${c_blu}######################################################${c_reset}"; echo "${c_blu}# $*${c_reset}"; echo "${c_blu}######################################################${c_reset}"; }
 
 DO_MODELS=1; DO_START=0
-DL_ARGS=()  # 額外的下載模型旗標,轉發給 download_models.sh
-for a in "$@"; do
-  case "$a" in
+DL_ARGS=()  # 任何 setup.sh 不認得的旗標都會原封轉發給 download_models.sh
+# 用 while + shift 才能正確處理 `--recipe NAME` 這種兩-token 形式
+while (( $# )); do
+  case "$1" in
     --no-models) DO_MODELS=0 ;;
     --start)     DO_START=1 ;;
-    --14b-*|--no-5b|--all|--everything|--chrono-edit|--textenc-fp16|--clip-vision|--wan21-vae|--rgba-lora)
-                 DL_ARGS+=("$a") ;;
     -h|--help)
-      echo "用法:./setup.sh [選項]"
-      echo "  --no-models   只裝環境,不下載模型"
-      echo "  --start       裝完直接啟動 ComfyUI"
-      echo "  --14b-t2v / --14b-i2v / --14b-fast / --14b-animate / --14b-s2v / ..."
-      echo "                轉發給 download_models.sh 的模型選項 (./download_models.sh --list 看全部)"
-      echo "  --all         5B + 14B t2v + 14B i2v + 14B fast (綜合包)"
-      echo "  --everything  全部變體 (>150GB,慎用)"
+      cat <<EOF
+用法:./setup.sh [選項]
+  --no-models       只裝環境,不下載模型
+  --start           裝完直接啟動 ComfyUI
+
+任何其他旗標都原樣轉發給 ./download_models.sh,例如:
+  ./setup.sh --14b-t2v --14b-fast            # 5B + 14B T2V + 4-step LoRA
+  ./setup.sh --recipe wan22-i2v-with-upscale # 一鍵裝整套工作流
+  ./setup.sh --recipe wan22-5b-fast          # 5B + FastWan 4-step LoRA
+  ./setup.sh --all                           # 5B + 14B t2v + 14B i2v + fast
+  ./setup.sh --everything                    # 所有變體 (>150GB,慎用)
+  ./setup.sh --no-5b                         # 只裝 14B,不抓 5B
+  ./setup.sh --list                          # 列出所有可下載 tag (印完即退)
+  ./setup.sh --list-recipes                  # 列出所有 recipe
+
+完整旗標清單請看 ./download_models.sh --help
+EOF
       exit 0 ;;
-    *) echo "未知參數:$a (用 --help 看可用選項)"; exit 1 ;;
+    # `--recipe NAME` 兩-token 形式:整對轉發
+    --recipe)
+      DL_ARGS+=("$1")
+      shift
+      [[ -n "${1:-}" ]] || { echo "✗ --recipe 需要一個值"; exit 1; }
+      DL_ARGS+=("$1") ;;
+    # 其他所有 -- 開頭的旗標一律轉發 (download_models.sh 自己會驗證合法性)
+    --*) DL_ARGS+=("$1") ;;
+    *) echo "✗ 未知參數:$1 (用 --help 看可用選項)"; exit 1 ;;
   esac
+  shift
 done
 
 chmod +x install.sh download_models.sh start.sh 2>/dev/null || true
