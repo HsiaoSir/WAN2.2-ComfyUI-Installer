@@ -6,15 +6,16 @@
 [![Python](https://img.shields.io/badge/Python-3.10--3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-cu128-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-native-1A1A1A?logo=github&logoColor=white)](https://github.com/comfyanonymous/ComfyUI)
-[![HF Models Verified](https://img.shields.io/badge/HF%20URLs-262%2F262%20verified-FFD21E?logo=huggingface&logoColor=black)](模型清單.md)
-[![Recipes](https://img.shields.io/badge/Recipes-73-blueviolet)](#workflow-recipes)
-[![Families](https://img.shields.io/badge/Model%20Families-Wan2.2%20%2B%2038-orange)](#)
+[![HF Models Verified](https://img.shields.io/badge/HF%20URLs-238%2F238%20verified-FFD21E?logo=huggingface&logoColor=black)](模型清單.md)
+[![Recipes](https://img.shields.io/badge/Recipes-67-blueviolet)](#workflow-recipes)
+[![Families](https://img.shields.io/badge/Model%20Families-Wan2.2%20%2B%2032-orange)](#)
+[![Paths](https://img.shields.io/badge/Paths-verified%20vs.%20canonical%20ComfyUI%20nodes-success)](#)
 [![Last commit](https://img.shields.io/github/last-commit/HsiaoSir/WAN2.2-ComfyUI-Installer)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer/commits/main)
 [![Stars](https://img.shields.io/github/stars/HsiaoSir/WAN2.2-ComfyUI-Installer?style=social)](https://github.com/HsiaoSir/WAN2.2-ComfyUI-Installer/stargazers)
 
 > Wan2.2-TI2V-5B × ComfyUI 一鍵安裝包 —— Ubuntu **22.04 / 24.04 / 26.04** (**x86_64** 或 **aarch64**) + **NVIDIA RTX**
 >
-> **2026-Q2 多家族擴充**:核心是 Wan2.2,但內含 **262 個 HF 模型 + 73 個 workflow recipe**,涵蓋 **LTX-Video / Hunyuan-Video (含 1.5) / Mochi-1 / CogVideoX 1.0+1.5 / SVD / AnimateDiff (含 v3 + LCM + MagicTime + SparseCtrl + 8 個 camera motion LoRA) / SkyReels V1+V2 / PyramidFlow / Cosmos Predict2 / Kandinsky-5 / DynamiCrafter / Sonic / Hallo+Hallo2 / EchoMimic V1+V2 / MagicAnimate / MusePose / AnimateAnyone / Champ / V-Express / LivePortrait / FollowYourEmoji / MimicMotion / FramePack / Foley / MMAudio / ControlNet / IPAdapter / SAM2 / DWPose / DepthAnything V2 / DepthFM / Lotus / BiRefNet / SUPIR / VEnhancer / Framer / GIMM-VFI** 等 38+ 家族。
+> **2026-Q2 多家族擴充**:核心是 Wan2.2,但內含 **238 個 HF 模型 + 67 個 workflow recipe**,涵蓋 **LTX-Video / Hunyuan-Video (含 1.5) / Mochi-1 / CogVideoX 1.0+1.5 / SVD / AnimateDiff (含 v3 + LCM + MagicTime + SparseCtrl + 8 個 camera motion LoRA) / SkyReels V1+V2 / PyramidFlow / Cosmos Predict2 / Kandinsky-5 / DynamiCrafter / Sonic / Hallo2 / EchoMimic V1+V2 / LivePortrait / FollowYourEmoji / MimicMotion / FramePack / Foley / MMAudio / ControlNet / IPAdapter / SAM2 / DWPose / DepthAnything V2 / DepthFM / Lotus / BiRefNet / SUPIR / VEnhancer / Framer / GIMM-VFI** 等 **32+ 家族**。每個檔案的子資料夾(`checkpoints/` / `diffusion_models/` / `CogVideo/` / `BiRefNet/` / `sam2/` / `unet/` / `latent_upscale_models/` ...)與檔名(BiRefNet 改名為 `General.safetensors`、Hallo2 改名為 `net.pth`、EchoMimic V2 入 `v2/` 子層等等)都對照各家族 ComfyUI 自訂節點官方 README + 原始碼驗證過。
 >
 > 為新手寫的腳本與文件:全程冪等(可重複執行),所有 HuggingFace 網址與安裝邏輯都已實測驗證。
 
@@ -47,7 +48,7 @@
 - TI2V-5B 同時支援**文字→影片(T2V)** 與 **圖片→影片(I2V)**,輸出 **720p @ 24fps、約 5 秒**,
   官方稱 **8GB VRAM** 就跑得動;12GB 卡跑起來相當輕鬆。
 - 內建多個 14B 變體選項(t2v / i2v / animate / s2v / Fun control/inpaint/camera/vace / ChronoEdit / 4-step 閃電 LoRA),
-  以及完整的 **262 個 HuggingFace 檔案 + 73 個 workflow recipe**,從官方 Wan-Video 一路擴展到 LTX-Video、Hunyuan-Video、Mochi、CogVideoX、SVD、AnimateDiff、SkyReels、Pyramid-Flow、Cosmos、Kandinsky-5、Sonic、Hallo、EchoMimic、MagicAnimate、MusePose、AnimateAnyone、Champ、V-Express、LivePortrait、FollowYourEmoji、MimicMotion、FramePack、Hunyuan-Foley、MMAudio、ControlNet、IPAdapter、SAM2、DWPose、DepthAnything V2、DepthFM、Lotus、BiRefNet、SUPIR、VEnhancer、Framer、GIMM-VFI 等 38+ 家族(全部 HTTP HEAD 驗證 200 + Content-Length>0;用 `./download_models.sh --list` 或 `--list-recipes` 看完整列表)。
+  以及完整的 **238 個 HuggingFace 檔案 + 67 個 workflow recipe**,從官方 Wan-Video 一路擴展到 LTX-Video、Hunyuan-Video (含 1.5)、Mochi、CogVideoX、SVD、AnimateDiff、SkyReels、Pyramid-Flow、Cosmos、Kandinsky-5、Sonic、Hallo2、EchoMimic V1+V2、LivePortrait、FollowYourEmoji、MimicMotion、FramePack、Hunyuan-Foley、MMAudio、ControlNet、IPAdapter、SAM2、DWPose、DepthAnything V2、DepthFM、Lotus、BiRefNet、SUPIR、VEnhancer、Framer、GIMM-VFI 等 **32+ 家族**(全部 HTTP HEAD 驗證 200 + Content-Length>0;每個檔案的子資料夾與檔名也都已對照各家族的 ComfyUI 官方節點 README 驗證過;用 `./download_models.sh --list` 或 `--list-recipes` 看完整列表)。
 
 ---
 
@@ -191,7 +192,7 @@ cd ~/WAN2.2-ComfyUI-Installer    # 回到專案資料夾
 |---|---|
 | `setup.sh` | **總入口**:一鍵跑完安裝 + 下載 + 顯示啟動方式 |
 | `install.sh` | 安裝環境:系統套件 + ComfyUI + venv + PyTorch CUDA |
-| `download_models.sh` | 下載模型:清單驅動,**262 個檔案 + 239 個 tag + 73 個 recipe**(Wan + 38 個其他家族) |
+| `download_models.sh` | 下載模型:清單驅動,**238 個檔案 + 215 個 tag + 67 個 recipe**(Wan + 32 個其他家族,所有路徑都對照官方節點 README 驗證) |
 | `start.sh` | 啟動 ComfyUI 伺服器 |
 | `README.md` | 本檔:總覽、安裝、使用 |
 | [安裝手冊.md](安裝手冊.md) | 詳細逐步教學 + 疑難排解 + 冪等原理 |
@@ -264,7 +265,7 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 ./download_models.sh --recipe wan22-i2v-with-upscale  # 一鍵裝 I2V + 4x 升頻 + RIFE 補幀
 ```
 
-**73 個內建 recipe**(全部 URL 已 HTTP HEAD 驗證 200 + Content-Length>0)— 用 `./download_models.sh --list-recipes` 看完整清單。下面只列出最常用的;**完整 73 個分類見下方**:
+**67 個內建 recipe**(URL + 子資料夾 + 檔名都對照官方 ComfyUI 節點 README 驗證過)— 用 `./download_models.sh --list-recipes` 看完整清單。下面只列出最常用的;**完整 67 個分類見下方**:
 
 #### Wan2.2 基礎(常用)
 | Recipe | 內含 tags | 適用情境 |
@@ -332,17 +333,14 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 
 | Family | Recipe | 內容 |
 |---|---|---|
-| **Sonic** | `sonic-talking-head` | Tencent Sonic 對嘴 (SVD 為底) |
-| **Hallo / Hallo2** | `hallo-talking-head` / `hallo2-long-talking` | 復旦 Hallo 對嘴 + Hallo2 長片版 |
-| **EchoMimic** | `echomimic-v1` / `echomimic-v2-halfbody` | 阿里 EchoMimic 對嘴 + V2 半身 |
-| **MagicAnimate** | `magicanimate-pose` | TikTok MagicAnimate (DensePose 控制) |
-| **MusePose** | `musepose-character` | 騰訊 MusePose 角色動畫 |
-| **AnimateAnyone** | `animateanyone` | Moore 社群實作 |
-| **Champ** | `champ-multimodal` | Champ 多模態 (Pose+Depth+Normal+Semantic) |
-| **V-Express** | `vexpress-audio-portrait` | V-Express 音訊驅動人像 |
-| **LivePortrait** | `liveportrait` | KwaiVGI LivePortrait (driving video) |
-| **FollowYourEmoji** | `followyouremoji` | 表情驅動人像 |
-| **MimicMotion** | `mimicmotion-v11` | 騰訊 MimicMotion v1.1 (Pose+SVD) |
+| **Sonic** | `sonic-talking-head` | Tencent Sonic 對嘴 (含 SVD-XT 為底) — 放到 `models/sonic/` |
+| **Hallo2** | `hallo2-long-talking` | 復旦 Hallo2 長片對嘴 — 放到 `models/Hallo/hallo2/`(smthemex 節點專用) |
+| **EchoMimic V1+V2** | `echomimic-v1` / `echomimic-v2-halfbody` | 阿里 EchoMimic 對嘴 — V1 放 `models/echo_mimic/`、V2 放 `models/echo_mimic/v2/`(smthemex 節點專用) |
+| **LivePortrait** | `liveportrait` | KwaiVGI LivePortrait (driving video) — 放到 `models/liveportrait/`(Kijai 節點專用) |
+| **FollowYourEmoji** | `followyouremoji` | 表情驅動人像 — 放到 `models/FYE/`(Kijai 節點專用) |
+| **MimicMotion** | `mimicmotion-v11` | 騰訊 MimicMotion v1.1 (Pose+SVD) — 放到 `models/mimicmotion/`(Kijai 節點專用) |
+
+> **以下 6 個家族刻意未包含**:Hallo V1 / V-Express / MusePose / AnimateAnyone(patrolli 版)/ Champ(Kijai wrapper)/ MagicAnimate。它們的官方 ComfyUI 自訂節點要求檔案放在 `ComfyUI/custom_nodes/<NodeName>/...` 子層內(而不是標準的 `ComfyUI/models/<X>/`),或要求 HuggingFace diffusers 多檔案資料夾結構(`config.json` + `diffusion_pytorch_model.safetensors`),單一 `.safetensors` 無法載入。安裝這些家族需要手動 clone 對應的 HF repo 到節點目錄,請看各家族的節點 README。
 
 #### 通用支援(ControlNet / IPAdapter / 分割 / 深度 / 音訊 / 去背 / 修復)
 
@@ -438,7 +436,8 @@ cd ~/WAN2.2-ComfyUI-Installer    # 換成你 clone 的實際路徑
 
 | 驗證內容 | 方法 | 結果 |
 |---|---|---|
-| HuggingFace 模型 URL | HTTP HEAD(200 + Content-Length>0) | **262 / 262 通過** |
+| HuggingFace 模型 URL | HTTP HEAD(200 + Content-Length>0) | **238 / 238 通過** |
+| 子資料夾 + 檔名對照官方節點 | 7 個平行 agent 爬各家族 ComfyUI 自訂節點 README + 原始碼 | 57 處路徑修正、24 個檔案因節點要求放在 `custom_nodes/` 內而排除 |
 | Ubuntu 22.04 安裝 | docker amd64 容器端到端 RUN#1 + RUN#2 | 通過 |
 | Ubuntu 24.04 安裝 | docker amd64 容器端到端 | 通過(t64 自動處理) |
 | Ubuntu 26.04 安裝 | docker amd64 容器三輪測試(冪等 + torch skip) | 通過 |
